@@ -217,4 +217,4 @@ Overall Work Time ≈ 65 hours
 5. Log out once testing is complete.
 
 # Youtube Link
-- [CSC4710-Project2] (ADD LATER). 
+- [CSC4710-Project2] (https://youtu.be/Vc7ir4f1nSE). 
