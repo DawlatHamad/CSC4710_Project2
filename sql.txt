@@ -1,5 +1,8 @@
 LINK: 
 
+
+SQL CODE:
+
  CREATE TABLE Users (
      userid INT AUTO_INCREMENT PRIMARY KEY,
      email VARCHAR(255) UNIQUE,                
@@ -163,7 +166,186 @@ LINK:
  INSERT INTO `TransactionPaid` (`historyid`, `transactionid`, `userid`, `quoteid`, `workid`, `cardid`, `created_at`, `paid_date`) VALUES
  (1, 3, 2, 6, 6, 2, '2024-12-15 17:25:17', '2024-12-15 17:26:23');
 
-Code Set Up:
+QUERY CODE:
+[Big clients]         SELECT 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role,
+            COUNT(t.transactionid) AS transaction_count
+        FROM 
+            Users u
+        JOIN 
+            Transactions t
+        ON 
+            u.userid = t.userid
+        GROUP BY 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role
+        HAVING 
+            transaction_count = (
+                SELECT MAX(transaction_count) 
+                FROM (
+                    SELECT COUNT(t.transactionid) AS transaction_count
+                    FROM Users u
+                    JOIN Transactions t
+                    ON u.userid = t.userid
+                    GROUP BY u.userid
+                ) AS Counts
+            ); 
+[Difficult clients]         SELECT 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role,
+            COUNT(w.workid) AS pending_work_count
+        FROM 
+            Users u
+        JOIN 
+            Work w
+        ON 
+            u.userid = w.userid
+        WHERE 
+            w.client_status = 'pending'
+        GROUP BY 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role
+        HAVING 
+            COUNT(w.workid) >= 3;
+ 
+[This month quotes]         SELECT 
+            quoteid,
+            userid,
+            address,
+            dimension_length,
+            dimension_width,
+            price,
+            client_note,
+            status,
+            admin_note,
+            created_at
+        FROM 
+            Quote
+        WHERE 
+            MONTH(created_at) = MONTH(CURRENT_DATE) AND YEAR(created_at) = YEAR(CURRENT_DATE);
+ 
+[Prospective clients] SELECT 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role
+        FROM 
+            Users u
+        LEFT JOIN 
+            Quote q
+        ON 
+            u.userid = q.userid
+        WHERE 
+            q.userid IS NULL AND u.userid != 1; -- Exclude user with userid = 1
+ 
+[Largest driveway]         SELECT 
+            q.quoteid,
+            q.userid,
+            q.address,
+            q.dimension_length,
+            q.dimension_width,
+            (q.dimension_length * q.dimension_width) AS area
+        FROM 
+            Quote q
+        WHERE 
+            (q.dimension_length * q.dimension_width) = (
+                SELECT MAX(q1.dimension_length * q1.dimension_width) 
+                FROM Quote q1
+            );
+  
+[Overdue bills]         SELECT 
+            t.transactionid,
+            t.quoteid,
+            t.workid,
+            t.userid,
+            t.start_date,
+            t.end_date,
+            t.price,
+            t.created_at
+        FROM 
+            Transactions t
+        WHERE 
+            t.charge_status = 'pending'
+            AND t.created_at <= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) 
+[Bad clients]         SELECT 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role,
+            COUNT(t.transactionid) AS pending_transaction_count
+        FROM 
+            Users u
+        JOIN 
+            Transactions t
+        ON 
+            u.userid = t.userid
+        WHERE 
+            t.charge_status = 'pending'
+            AND t.created_at <= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+        GROUP BY 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role;
+   
+[Good clients]         SELECT 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role
+        FROM 
+            Users u
+        JOIN 
+            TransactionPaid t
+        ON 
+            u.userid = t.userid
+        WHERE 
+            t.paid_date <= DATE_ADD(t.created_at, INTERVAL 7 DAY)
+        GROUP BY 
+            u.userid, 
+            u.email, 
+            u.firstname, 
+            u.lastname, 
+            u.address, 
+            u.phone, 
+            u.role;
+
+
+CODE SET UP: 
+
 FINAL
 ├── adminPanel 
 │   ├── admin.php             
