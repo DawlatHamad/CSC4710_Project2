@@ -5,8 +5,9 @@ CSC 4710 Project 2
 This project involves designing and implementing a database-driven web application for managing driveway-sealing operations for a contractor, David Smith. The system includes functionalities for registration, request for quotes, negotiations, order creation, and billing. Clients can submit requests, negotiate quotes, track their progress, and pay bills. The contractor (David) manages incoming requests, generates work forms, order forms, bills, and tracks orders through a dashboard. The system also provides detailed queries, such as identifying high-value clients, overdue bills, and quote history.
 
 ## Contributors 
-Sumaiya Ahmed
-Dawlat Hamad
+Sumaiya Ahmed => User Panel and Technical Report
+Dawlat Hamad => Admin Panel and Login/Register Screen
+Overall Work Time ≈ 65 hours
 
 ## Directions
 **Pre-requisites**: Watch the following videos to learn how to set up the database and PHP files:
